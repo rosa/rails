@@ -39,6 +39,10 @@ class ActiveStorage::DiskControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "showing blob with invalid key" do
+    get rails_disk_service_url(encoded_key: "Invalid key", filename: "hello.txt")
+    assert_response :not_found
+  end
 
   test "directly uploading blob with integrity" do
     data = "Something else entirely!"
