@@ -143,6 +143,8 @@ module ActiveRecord
 
       def for_each
         databases = Rails.application.config.database_configuration
+        $stdout.puts "databases: #{databases.inspect}"
+        $stdout.puts "Loading configs for env_name #{Rails.env}"
         database_configs = ActiveRecord::DatabaseConfigurations.new(databases).configs_for(env_name: Rails.env)
 
         # if this is a single database application we don't want tasks for each primary database
