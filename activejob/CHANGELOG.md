@@ -7,10 +7,11 @@
     discarding a job based only on this exception might lead to losing relevant,
     perfectly fine jobs.
 
-    Instead, `ActiveJob::DeserializationError::RecordNotFound` is raised when the
-    underlying error is one of the exceptions in
-    `ActiveJob::Arguments.record_not_found_exceptions`, where Active Record
-    registers `ActiveRecord::RecordNotFound`.
+    Global IDs are now looked up with `GlobalID::Locator.fetch`, which raises
+    `GlobalID::Locator::RecordNotFound` when the record no longer exists and
+    `GlobalID::Locator::RecordUnavailable` for other backend failures. Active Job
+    maps the former to `DeserializationError::RecordNotFound` and wraps the
+    latter in the more general `DeserializationError`.
 
     In this way, existing handlers for the parent class continue to
     work as before, but jobs can now discard on missing records specifically:
@@ -19,7 +20,7 @@
     discard_on ActiveJob::DeserializationError::RecordNotFound
     ```
 
-    *Rosa Gutiérrez*
+    *Rosa Gutiérrez, Willian Tenfen Wazilewski*
 
 *   Allow queue adapters to inspect a job when deciding whether to interrupt at
     a checkpoint, and to optionally return a specific interruption reason.
