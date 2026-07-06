@@ -1,25 +1,19 @@
-*   Add `ActiveJob::DeserializationError::RecordNotFound`, raised when argument
-    deserialization fails because a referenced record could not be found, and not
-    for any other reason.
+*   Switch to `GlobalID::Locator.fetch` API for deserializing Global IDs.
 
-    Its parent class, `ActiveJob::DeserializationError` is raised when any error
-    happens during argument deserialization, including transient DB errors, and
-    discarding a job based only on this exception might lead to losing relevant,
-    perfectly fine jobs.
+    Active Job now calls `GlobalID::Locator.fetch` instead of `locate`, which raises
+    distinct exceptions for different failure modes:
+    `GlobalID::Locator::RecordNotFound` for missing records and
+    `GlobalID::Locator::RecordUnavailable` for transient backend failures.
 
-    Instead, `ActiveJob::DeserializationError::RecordNotFound` is raised when the
-    underlying error is one of the exceptions in
-    `ActiveJob::Arguments.record_not_found_exceptions`, where Active Record
-    registers `ActiveRecord::RecordNotFound`.
-
-    In this way, existing handlers for the parent class continue to
-    work as before, but jobs can now discard on missing records specifically:
+    These distinct errors are mapped to `DeserializationError::RecordNotFound` and
+    the base `DeserializationError` respectively, allowing jobs to safely discard
+    only on missing records without accidentally swallowing transient errors:
 
     ```ruby
     discard_on ActiveJob::DeserializationError::RecordNotFound
     ```
 
-    *Rosa Gutiérrez*
+    *Rosa Gutiérrez, Willian Tenfen Wazilewski*
 
 *   Allow queue adapters to inspect a job when deciding whether to interrupt at
     a checkpoint, and to optionally return a specific interruption reason.
